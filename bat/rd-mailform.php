@@ -82,45 +82,24 @@ try {
         array($subject, $_SERVER['SERVER_NAME']),
         $template);
 
-    $mail = new PHPMailer();
-
+    $mail = new PHPMailer(true); // Hata ayıklama özelliği etkinleştirildi
 
     if ($formConfig['useSmtp']) {
-        //Tell PHPMailer to use SMTP
         $mail->isSMTP();
-
-        //Enable SMTP debugging
-        // 0 = off (for production use)
-        // 1 = client messages
-        // 2 = client and server messages
-        $mail->SMTPDebug = 0;
-
+        $mail->SMTPDebug = 2; // Hata ayıklama düzeyi
         $mail->Debugoutput = 'html';
-
-        // Set the hostname of the mail server
         $mail->Host = $formConfig['host'];
-
-        // Set the SMTP port number - likely to be 25, 465 or 587
         $mail->Port = $formConfig['port'];
-
-        // Whether to use SMTP authentication
         $mail->SMTPAuth = true;
         $mail->SMTPSecure = "ssl";
-
-        // Username to use for SMTP authentication
         $mail->Username = $formConfig['username'];
-
-        // Password to use for SMTP authentication
         $mail->Password = $formConfig['password'];
     }
 
     $mail->From = $addresses[0][0][0];
 
-    # Attach file
-    if (isset($_FILES['file']) &&
-        $_FILES['file']['error'] == UPLOAD_ERR_OK) {
-        $mail->AddAttachment($_FILES['file']['tmp_name'],
-            $_FILES['file']['name']);
+    if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
+        $mail->AddAttachment($_FILES['file']['tmp_name'], $_FILES['file']['name']);
     }
 
     if (isset($_POST['name'])){
@@ -130,17 +109,17 @@ try {
     }
 
     foreach ($addresses[0] as $key => $value) {
-        $mail->addAddress($value[0]);
-    }
+       Hata ayıklama özelliğini etkinleştirdikten sonra, PHPMailer'ın SMTP hata mesajlarını gösterecektir. Hata ayıklama düzeyini belirlemek için `$mail->SMTPDebug` değişkenini kullanabilirsiniz. Örneğin, `$mail->SMTPDebug = 2;` olarak ayarladığınızda, hata mesajları ekranda görüntülenecektir.
 
-    $mail->CharSet = 'utf-8';
-    $mail->Subject = $subject;
-    $mail->MsgHTML($template);
-    $mail->send();
+Aşağıdaki güncellenmiş kod, hata ayıklama özelliğini etkinleştirir ve hata mesajlarını görüntüler:
 
-    die('MF000');
-} catch (phpmailerException $e) {
-    die('MF254');
+```php
+$mail = new PHPMailer(true); // Hata ayıklama özelliği etkinleştirildi
+$mail->SMTPDebug = 2; // Hata ayıklama düzeyi
+$mail->Debugoutput = 'html';
+
+try {
+    // E-posta gönderme kodu
 } catch (Exception $e) {
-    die('MF255');
+    echo 'E-posta gönderme hatası: ' . $mail->ErrorInfo;
 }
